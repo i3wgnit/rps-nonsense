@@ -50,7 +50,9 @@ if ( CANVAS.MOBILE ) {
     window.addEventListener( "click", function( event ) {
         var rect = CANVAS.doc.getBoundingClientRect();
         GAME.touch.x = event.clientX - rect.left;
+        GAME.touch.x *= CANVAS.WIDTH / CANVAS.currentWidth;
         GAME.touch.y = event.clientY - rect.top;
+        GAME.touch.y *= CANVAS.HEIGHT / CANVAS.currentHeight;
     }, false );
 }
 
