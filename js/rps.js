@@ -49,14 +49,19 @@ if ( CANVAS.MOBILE ) {
 
     window.addEventListener( "touchmove", function( event ) {
         event.preventDefault();
-        var touch = event.touches[0],
+        var touches = event.changedTouches,
             rect = CANVAS.doc.getBoundingClientRect();
 
-        GAME.touch.x = touch.clientX - rect.left;
-        GAME.touch.x *= CANVAS.WIDTH / CANVAS.currentWidth;
+        for ( var i = 0; i < touches.length; i += 1 ) {
+            if ( GAME.touch.id == touches[i].identifier ) {
+                GAME.touch.x = touches[i].clientX - rect.left;
+                GAME.touch.x *= CANVAS.WIDTH / CANVAS.currentWidth;
 
-        GAME.touch.y = touch.clientY - rect.top;
-        GAME.touch.y *= CANVAS.HEIGHT / CANVAS.currentHeight;
+                GAME.touch.y = touches[i].clientY - rect.top;
+                GAME.touch.y *= CANVAS.HEIGHT / CANVAS.currentHeight;
+            }
+        }
+
     }, false );
 
     window.addEventListener( "touchend", function( event ) {
