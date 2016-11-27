@@ -285,6 +285,7 @@ if ( CANVAS.MOBILE ) {
         for ( var i = 0; i < touches.length; i += 1 ) {
             if ( GAME.touch.id == touches[i].identifier ) {
                 GAME.upTouch( touches[i] );
+                GAME.hover();
             }
         }
 
