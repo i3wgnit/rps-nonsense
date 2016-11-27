@@ -144,13 +144,19 @@ GAME.click = function() {
             }
         } );
     } else if ( GAME.state == 1 ) {
-        GAME.me.next = parseInt( 3 * Math.random() );
         GAME.txt = "";
         GAME.state = 0;
         if ( GAME.me.points - GAME.you.points >= 19 ) {
             GAME.txt = "Too bad, you lost. Want to play again?"
             GAME.state = -1;
+        } else {
+            GAME.me.next = parseInt( 3 * Math.random() );
         }
+    } else if ( GAME.state == 2 ) {
+        GAME.state = 1;
+        GAME.txt = "Way better, isn't it?";
+        GAME.me.points += GAME.you.points;
+        GAME.you.points = 0;
     } else if ( GAME.state < 0 ) {
         if ( !GAME.play ) {
             GAME.state -= 1;
@@ -201,7 +207,8 @@ GAME.changeRules = function() {
     }
 
     if ( GAME.you.points - GAME.me.points >= 18 ) {
-        GAME.txt = "This game is dumb, I'm not playing unless you give me all your points";
+        GAME.txt = "This game is dumb, let's swap points, ok?";
+        GAME.state = 2;
     }
     console.log( "p, r: " + p + " | " + r );
 };
