@@ -51,6 +51,7 @@ var CANVAS = {
 
     init: function() {
         document.body.style.margin = "0px";
+        document.body.style.padding = "0px";
 
         CANVAS.doc = document.createElement( "canvas" );
         CANVAS.ctx = CANVAS.doc.getContext( "2d" );
@@ -113,6 +114,8 @@ var CANVAS = {
             CANVAS.SCALE = CANVAS.currentWidth / CANVAS.WIDTH;
         }
 
+        document.body.style.width = window.innerWidth;
+        document.body.style.height = window.innerHeight;
         CANVAS.doc.style.width = CANVAS.currentWidth;
         CANVAS.doc.style.height = CANVAS.currentHeight;
 
@@ -120,11 +123,11 @@ var CANVAS = {
             document.body.style.height = window.innerHeight + 50 + "px";
         }
 
-        setTimeout( function() {
+        delay( function() {
             window.scrollTo( 0, 1 );
-            setTimeout( function() {
-                window.scrollTo( 0, 0 );
-            }, 100 );
+        }, 100 )
+        .delay( function() {
+            window.scrollTo( 0, 0 );
         }, 100 );
     },
 
