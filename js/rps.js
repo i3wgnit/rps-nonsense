@@ -39,6 +39,10 @@ CANVAS.WIDTH = 1280;
 CANVAS.HEIGHT = 720;
 CANVAS.FPS = 60;
 CANVAS.load = [
+    [ "0", "img/0.jpg" ],
+    [ "1", "img/1.jpg" ],
+    [ "2", "img/2.jpg" ],
+
     [ "0_0", "img/0_0.png" ],
     [ "1_0", "img/1_0.png" ],
     [ "2_0", "img/2_0.png" ],
@@ -55,13 +59,24 @@ CANVAS.refresh = function() {
     CANVAS.Draw.clear();
     CANVAS.Draw.rect( 1, 1, 1278, 718 ).stroke();
 
+    if ( GAME.n ) {
+        CANVAS.ctx.drawImage( CANVAS.images[ GAME.me.next ], 384, 124, 248, 248 );
+        CANVAS.Draw.rect( 384, 124, 248, 248 ).fill( "rgba(" + colors[GAME.me.next] + ",0.5)" );
+        CANVAS.Draw.rect( 384, 124, 248, 248 ).stroke( "black", 8 );
+    }
+
+    if ( GAME.p ) {
+        CANVAS.Draw.text( "Me: " + GAME.me.points, 36, 576, 76, "black" );
+        CANVAS.Draw.text( GAME.you.points + " :You", 1008, 576, 76, "black", "right" );
+    }
+
     GAME.buttons.forEach( function( elem, ix ) {
         CANVAS.ctx.drawImage( CANVAS.images[ ix + "_" + elem.state ],
                              elem.x, elem.y, elem.w, elem.h );
-        CANVAS.Draw.rect( elem.x, elem.y, elem.w, elem.h ).fill( elem.style );
+        CANVAS.Draw.rect( elem.x, elem.y, elem.w, elem.h ).fill( "rgba(" + elem.style + ", .5)" );
     } );
 
-    CANVAS.Draw.text( GAME.txt, 24, 512, 24, "black" );
+    CANVAS.Draw.text( GAME.txt, 24, 472, 24, "black" );
 
     // Debug
     var txt1 = "MousePos: " + GAME.touch.x + ", " + GAME.touch.y,
@@ -76,6 +91,9 @@ var GAME = {
     state: -1,
     rules: false,
     txt: "",
+    count: 0,
+    n: 0,
+    p: 0,
     buttons: []
 };
 
@@ -84,7 +102,7 @@ GAME.Player = function( n, p ) {
     this.next = n;
 }
 
-GAME.me = new GAME.Player( 1, 0 );
+GAME.me = new GAME.Player( 1, 3 );
 GAME.you = new GAME.Player( null, 0 );
 
 GAME.Button = function( x, y, w, h, s ) {
@@ -96,9 +114,9 @@ GAME.Button = function( x, y, w, h, s ) {
     this.state = 0;
 }
 
-var colors = [ "rgba(255, 182, 193, 0.5)",
-              "rgba(144, 238, 144, 0.5)",
-              "rgba(137, 207, 240, 0.5)" ]
+var colors = [ "255, 182, 193",
+              "144, 238, 144",
+              "137, 207, 240" ]
 
 colors.forEach( function( elem, ix ) {
     GAME.buttons[ix] = new GAME.Button( 1032, 24 + ix * 224, 224, 224, elem );
@@ -107,11 +125,10 @@ colors.forEach( function( elem, ix ) {
 GAME.hover = function() {
     if ( GAME.state == 0 ) {
         GAME.buttons.forEach( function( elem, ix ) {
+            elem.state = 0;
             if ( GAME.touch.x >= elem.x && GAME.touch.x <= elem.x + elem.w &&
                 GAME.touch.y >= elem.y && GAME.touch.y <= elem.y + elem.h ) {
                 elem.state = 1;
-            } else {
-                elem.state = 0;
             }
         } );
     }
@@ -126,15 +143,12 @@ GAME.click = function() {
             }
         } );
     } else if ( GAME.state == 1 ) {
+        GAME.me.next = parseInt( 3 * Math.random() );
         GAME.txt = "";
         GAME.state = 0;
-        if ( GAME.me.points - GAME.you.points >= 50 ) {
+        if ( GAME.me.points - GAME.you.points >= 19 ) {
             GAME.txt = "Too bad, you lost. Want to play again?"
             GAME.state = -3;
-        }
-
-        if ( GAME.me.points < GAME.you.points ) {
-            GAME.changeRules();
         }
     } else if ( GAME.state < 0 ) {
         GAME.state -= 1;
@@ -145,11 +159,21 @@ GAME.click = function() {
                 t = "Hello there! Welcome.";
                 break;
             case 2:
-                t = "Since it's your first time playing, I will give myself 5 points.";
+                t = "This is just like normal Rock Paper Scissors."
+                break;
+            case 3:
+                t = "The goal is to get a 19 points advantage."
+                break;
+            case 4:
+                t = "Here is what I'm going to play, you do you.";
+                GAME.n = true;
+                break;
+            case 5:
+                t = "Since it's your first time playing, I will give myself 3 points.";
+                GAME.p = true;
                 break;
             default:
                 GAME.state = 0;
-                GAME.me.points = 5;
                 GAME.play = true;
         }
         GAME.txt = t;
@@ -159,25 +183,33 @@ GAME.click = function() {
 
 GAME.changeRules = function() {
     var c = 0.0557,
-        p = c * ( GAME.me.points - GAME.you.points ),
+        p = c * ( GAME.count ),
         r = Math.random();
 
     if ( r < p ) {
         GAME.rules = !GAME.rules;
+        GAME.txt = "Hey, this is getting a bit unfair, how about we change the rules?";
+        GAME.state = 1;
     }
+
+    if ( GAME.you.points - GAME.me.points >= 18 ) {
+        GAME.txt = "This game is dumb, I'm not playing unless you give me all your points";
+    }
+    console.log( "p, r: " + p + " | " + r );
 };
 
 GAME.gText = function( x ) {
     var t = "";
     switch ( x ) {
         case 1:
-            t = "According to the rules, you Lose when you " + ( GAME.rules ? "Lose" : "Win" );
+            t = "According to the rules, you Lose when you " +
+                ( GAME.rules ? "Lose" : "Win" ) + ".";
             break;
         case 2:
             t = "I'm impressed that a monkey like you managed to Win.";
             break;
         default:
-            t = "Since it's a Draw, it might as well be my point, right?";
+            t = "Since it's a Draw, it might as well be my Win, right?";
     }
     return t;
 };
@@ -193,17 +225,21 @@ GAME.choose = function( x ) {
         res = GAME.you.next - GAME.me.next;
     }
     res = ( res + 3 ) % 3;
-    console.log( "yn, r: " + x + " | " + res );
+    GAME.txt = GAME.gText( res );
+    console.log( "mn, yn, r: " + GAME.me.next + " | " + x + " | " + res );
 
     if ( res == 2 ) {
         GAME.you.points += 1;
+        GAME.count += 1;
     } else {
         GAME.me.points += 1;
+        GAME.count = 0;
     }
+    console.log( "p: " + GAME.me.points + " | " + GAME.you.points );
 
-    GAME.txt = GAME.gText( res );
-
-    console.log( GAME.txt );
+    if ( GAME.me.points < GAME.you.points ) {
+        GAME.changeRules();
+    }
 };
 
 GAME.touch = {
