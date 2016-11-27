@@ -116,11 +116,16 @@ if ( CANVAS.MOBILE ) {
         }
     }, false );
 
-    var wDiv = document.createElement( "div" );
-    wDiv.style.display = "block";
-    wDiv.style.margin = "auto";
-    wDiv.innerHTML = "Change the orientation to Landscape";
-    document.body.appendChild( wDiv );
+            var wDiv = document.createElement( "div" );
+            wDiv.style.display = "block";
+            wDiv.style.margin = "auto";
+            document.body.appendChild( wDiv );
+
+    window.addEventListener( "resize", function() {
+        if ( window.innerHeight > window.innerWidth ) {
+            wDiv.innerHTML = "Change the orientation to Landscape";
+        }
+    } );
 } else {
     window.addEventListener( "click", function( event ) {
         var rect = CANVAS.doc.getBoundingClientRect();
