@@ -124,6 +124,8 @@ if ( CANVAS.MOBILE ) {
     window.addEventListener( "resize", function() {
         if ( window.innerHeight > window.innerWidth ) {
             wDiv.innerHTML = "Change the orientation to Landscape";
+        } else {
+            wDiv.innerHTML = "";
         }
     } );
 } else {
