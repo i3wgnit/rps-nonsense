@@ -10,17 +10,54 @@ CANVAS.update = function() {
 CANVAS.refresh = function() {
     CANVAS.Draw.clear();
 
-    CANVAS.Draw.rect( 1280 - 240, 0, 240, 240 ).stroke();
-    CANVAS.Draw.rect( 1280 - 240, 240, 240, 240 ).stroke();
-    CANVAS.Draw.rect( 1280 - 240, 480, 240, 240 ).stroke();
+    GAME.buttons.forEach( function( elem ) {
+        CANVAS.Draw.rect( elem.x, elem.y, elem.w, elem.h ).fill( elem.style );;
+    } );
 
-    var txt = "MousePos: " + GAME.touch.x + ", " + GAME.touch.y;
-    CANVAS.Draw.text( txt, 1, 2, 16, "black" );
-    CANVAS.Draw.text( GAME.touch.id, 1, 16, 16, "black" );
-    CANVAS.Draw.text( "" + !!GAME.touch.press, 1, 32, 16, "black" );
+    var txt1 = "MousePos: " + GAME.touch.x + ", " + GAME.touch.y,
+        txt2 = "id: " + GAME.touch.id,
+        txt3 = "press: " + GAME.touch.press;
+    CANVAS.Draw.text( txt1, 1, 2, 16, "black" );
+    CANVAS.Draw.text( txt2, 1, 14, 16, "black" );
+    CANVAS.Draw.text( txt3, 1, 23, 16, "black" );
 };
 
-var GAME = {};
+var GAME = {
+    buttons: []
+};
+
+GAME.Button = function( x, y, w, h, s ) {
+    this.x = x;
+    this.y = y;
+    this.w = w;
+    this.h = h;
+    this.style = s;
+}
+
+var colors = [ "lightpink",
+              "lightgreen",
+              "#89CFF0" ]
+
+colors.forEach( function( elem, ix ) {
+    GAME.buttons[ix] = new GAME.Button( 1038,
+                                       6 + ix * 236,
+                                       236,
+                                       236,
+                                       elem );
+} );
+
+GAME.click = function() {
+    GAME.buttons.forEach( function( elem, ix ) {
+        if ( GAME.touch.x >= elem.x && GAME.touch.x <= elem.x + elem.w &&
+            GAME.touch.y >= elem.y && GAME.touch.y <= elem.y + elem.h ) {
+            GAME.choose( ix );
+        }
+    } );
+};
+
+GAME.choose = function( c ) {
+    alert( c );
+}
 
 GAME.touch = {
     x: 0,
@@ -71,6 +108,8 @@ if ( CANVAS.MOBILE ) {
         for ( var i = 0; i < touches.length; i += 1 ) {
             if ( GAME.touch.id == touches[i].identifier ) {
                 GAME.touch.press = false;
+
+                GAME.click();
             }
         }
     }, false );
@@ -81,6 +120,8 @@ if ( CANVAS.MOBILE ) {
         GAME.touch.x *= CANVAS.WIDTH / CANVAS.currentWidth;
         GAME.touch.y = event.clientY - rect.top;
         GAME.touch.y *= CANVAS.HEIGHT / CANVAS.currentHeight;
+
+        GAME.click();
     }, false );
 }
 
