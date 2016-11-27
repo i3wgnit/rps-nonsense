@@ -39,13 +39,16 @@ CANVAS.WIDTH = 1280;
 CANVAS.HEIGHT = 720;
 CANVAS.FPS = 60;
 CANVAS.load = [
-    [ "0_0", "img/1_0.jpg" ],
-    [ "1_0", "img/1_0.jpg" ],
-    [ "2_0", "img/1_0.jpg" ]
+    [ "0_0", "img/0_0.png" ],
+    [ "1_0", "img/1_0.png" ],
+    [ "2_0", "img/2_0.png" ],
+
+    [ "0_1", "img/0_1.png" ],
+    [ "1_1", "img/1_1.png" ],
+    [ "2_1", "img/2_1.png" ]
 ];
 
 CANVAS.update = function() {
-
 };
 
 CANVAS.refresh = function() {
@@ -53,10 +56,14 @@ CANVAS.refresh = function() {
     CANVAS.Draw.rect( 1, 1, 1278, 718 ).stroke();
 
     GAME.buttons.forEach( function( elem, ix ) {
-        CANVAS.ctx.drawImage( CANVAS.images[ ix + "_0" ], elem.x, elem.y, elem.w, elem.h )
+        CANVAS.ctx.drawImage( CANVAS.images[ ix + "_" + elem.state ],
+                             elem.x, elem.y, elem.w, elem.h );
         CANVAS.Draw.rect( elem.x, elem.y, elem.w, elem.h ).fill( elem.style );
     } );
 
+    CANVAS.Draw.text( GAME.txt, 24, 512, 24, "black" );
+
+    // Debug
     var txt1 = "MousePos: " + GAME.touch.x + ", " + GAME.touch.y,
         txt2 = "id: " + GAME.touch.id,
         txt3 = "press: " + GAME.touch.press;
@@ -77,7 +84,7 @@ GAME.Player = function( n, p ) {
     this.next = n;
 }
 
-GAME.me = new GAME.Player( 1, 5 );
+GAME.me = new GAME.Player( 1, 0 );
 GAME.you = new GAME.Player( null, 0 );
 
 GAME.Button = function( x, y, w, h, s ) {
@@ -86,15 +93,29 @@ GAME.Button = function( x, y, w, h, s ) {
     this.w = w;
     this.h = h;
     this.style = s;
+    this.state = 0;
 }
 
-var colors = [ "rgba(255, 182, 193, 0.6)",
-              "rgba(144, 238, 144, 0.6)",
-              "rgba(137, 207, 240, 0.6)" ]
+var colors = [ "rgba(255, 182, 193, 0.5)",
+              "rgba(144, 238, 144, 0.5)",
+              "rgba(137, 207, 240, 0.5)" ]
 
 colors.forEach( function( elem, ix ) {
     GAME.buttons[ix] = new GAME.Button( 1032, 24 + ix * 224, 224, 224, elem );
 } );
+
+GAME.hover = function() {
+    if ( GAME.state == 0 ) {
+        GAME.buttons.forEach( function( elem, ix ) {
+            if ( GAME.touch.x >= elem.x && GAME.touch.x <= elem.x + elem.w &&
+                GAME.touch.y >= elem.y && GAME.touch.y <= elem.y + elem.h ) {
+                elem.state = 1;
+            } else {
+                elem.state = 0;
+            }
+        } );
+    }
+}
 
 GAME.click = function() {
     if ( GAME.state == 0 ) {
@@ -105,16 +126,19 @@ GAME.click = function() {
             }
         } );
     } else if ( GAME.state == 1 ) {
+        GAME.txt = "";
         GAME.state = 0;
         if ( GAME.me.points - GAME.you.points >= 50 ) {
-            GAME.state = -1;
+            GAME.txt = "Too bad, you lost. Want to play again?"
+            GAME.state = -3;
         }
 
         if ( GAME.me.points < GAME.you.points ) {
             GAME.changeRules();
         }
     } else if ( GAME.state < 0 ) {
-        var s = 0 - GAME.state,
+        GAME.state -= 1;
+        var s = 0 - GAME.state - 1,
             t = "";
         switch ( s ) {
             case 1:
@@ -124,10 +148,12 @@ GAME.click = function() {
                 t = "Since it's your first time playing, I will give myself 5 points.";
                 break;
             default:
-                GAME.state = 1;
+                GAME.state = 0;
+                GAME.me.points = 5;
+                GAME.play = true;
         }
-        GAME.state -= 1;
         GAME.txt = t;
+        console.log( "s: " + GAME.state );
     }
 };
 
@@ -167,7 +193,7 @@ GAME.choose = function( x ) {
         res = GAME.you.next - GAME.me.next;
     }
     res = ( res + 3 ) % 3;
-    console.log( x + " | " + res );
+    console.log( "yn, r: " + x + " | " + res );
 
     if ( res == 2 ) {
         GAME.you.points += 1;
@@ -189,7 +215,7 @@ GAME.touch = {
 
 CANVAS.init();
 
-function upTouch( evt ) {
+GAME.upTouch = function( evt ) {
     var rect = CANVAS.doc.getBoundingClientRect();
     GAME.touch.x = evt.clientX - rect.left;
     GAME.touch.x *= CANVAS.WIDTH / CANVAS.currentWidth;
@@ -202,7 +228,7 @@ if ( CANVAS.MOBILE ) {
         event.preventDefault();
 
         var touch = event.touches[0];
-        upTouch( touch );
+        GAME.upTouch( touch );
         GAME.touch.id = touch.identifier;
         GAME.touch.press = true;
     }, false );
@@ -214,7 +240,7 @@ if ( CANVAS.MOBILE ) {
 
         for ( var i = 0; i < touches.length; i += 1 ) {
             if ( GAME.touch.id == touches[i].identifier ) {
-                upTouch( touches[i] );
+                GAME.upTouch( touches[i] );
             }
         }
 
@@ -237,10 +263,13 @@ if ( CANVAS.MOBILE ) {
         GAME.touch.press = true;
     } );
 
-    window.addEventListener( "mousemove", upTouch, false );
+    window.addEventListener( "mousemove", function( event ) {
+        GAME.upTouch( event );
+        GAME.hover();
+    }, false );
 
     window.addEventListener( "mouseup", function( event ) {
-        upTouch( event );
+        GAME.upTouch( event );
         GAME.touch.press = false;
         GAME.click();
     }, false )
