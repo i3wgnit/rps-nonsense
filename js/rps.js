@@ -66,6 +66,8 @@ GAME.touch = {
     press: false
 };
 
+CANVAS.init();
+
 if ( CANVAS.MOBILE ) {
     window.addEventListener( "touchstart", function( event ) {
         event.preventDefault();
@@ -113,6 +115,12 @@ if ( CANVAS.MOBILE ) {
             }
         }
     }, false );
+
+    var wDiv = document.createElement( "div" );
+    wDiv.style.display = "block";
+    wDiv.style.margin = "auto";
+    wDiv.innerHTML = "Change the orientation to Landscape";
+    document.body.appendChild( wDiv );
 } else {
     window.addEventListener( "click", function( event ) {
         var rect = CANVAS.doc.getBoundingClientRect();
@@ -124,5 +132,3 @@ if ( CANVAS.MOBILE ) {
         GAME.click();
     }, false );
 }
-
-CANVAS.init();
