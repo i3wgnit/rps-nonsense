@@ -147,7 +147,7 @@ GAME.click = function() {
         GAME.txt = "";
         GAME.state = 0;
         if ( GAME.me.points - GAME.you.points >= 19 ) {
-            GAME.txt = "Too bad, you lost. Want to play again?"
+            GAME.txt = "Look at that! I won. Want to play again?"
             GAME.state = -1;
         } else {
             GAME.me.next = parseInt( 3 * Math.random() );
