@@ -88,6 +88,7 @@ CANVAS.refresh = function() {
 };
 
 var GAME = {
+    play: 0,
     state: -1,
     rules: false,
     txt: "",
@@ -148,165 +149,171 @@ GAME.click = function() {
         GAME.state = 0;
         if ( GAME.me.points - GAME.you.points >= 19 ) {
             GAME.txt = "Too bad, you lost. Want to play again?"
-            GAME.state = -3;
+            GAME.state = -1;
         }
     } else if ( GAME.state < 0 ) {
-        GAME.state -= 1;
-        var s = 0 - GAME.state - 1,
-            t = "";
-        switch ( s ) {
+        if ( !GAME.play ) {
+            GAME.state -= 1;
+            var s = 0 - GAME.state - 1,
+                t = "";
+            switch ( s ) {
+                case 1:
+                    t = "Hello there! Welcome.";
+                    break;
+                case 2:
+                    t = "This is just like normal Rock Paper Scissors."
+                    break;
+                case 3:
+                    t = "The goal is to get a 19 points advantage."
+                    break;
+                case 4:
+                    t = "Here is what I'm going to play, you do you.";
+                    GAME.n = true;
+                    break;
+                case 5:
+                    t = "Since it's your first time playing, I will give myself 3 points.";
+                    GAME.p = true;
+                    break;
+                default:
+                    GAME.state = 0;
+                    GAME.play = true;
+            }
+            GAME.txt = t;
+            console.log( "s: " + GAME.state );
+        } else {
+            GAME.me.points = 0;
+            GAME.you.points = 0;
+            GAME.state = 0;
+            GAME.txt = "";
+        }
+    };
+
+    GAME.changeRules = function() {
+        var c = 0.0557,
+            p = c * ( GAME.count ),
+            r = Math.random();
+
+        if ( r < p ) {
+            GAME.rules = !GAME.rules;
+            GAME.txt = "Hey, this is getting a bit unfair, how about we change the rules?";
+            GAME.state = 1;
+        }
+
+        if ( GAME.you.points - GAME.me.points >= 18 ) {
+            GAME.txt = "This game is dumb, I'm not playing unless you give me all your points";
+        }
+        console.log( "p, r: " + p + " | " + r );
+    };
+
+    GAME.gText = function( x ) {
+        var t = "";
+        switch ( x ) {
             case 1:
-                t = "Hello there! Welcome.";
+                t = "According to the rules, you Lose when you " +
+                    ( GAME.rules ? "Lose" : "Win" ) + ".";
                 break;
             case 2:
-                t = "This is just like normal Rock Paper Scissors."
-                break;
-            case 3:
-                t = "The goal is to get a 19 points advantage."
-                break;
-            case 4:
-                t = "Here is what I'm going to play, you do you.";
-                GAME.n = true;
-                break;
-            case 5:
-                t = "Since it's your first time playing, I will give myself 3 points.";
-                GAME.p = true;
+                t = "I'm impressed that a monkey like you managed to Win.";
                 break;
             default:
-                GAME.state = 0;
-                GAME.play = true;
+                t = "Since it's a Draw, it might as well be my Win, right?";
         }
-        GAME.txt = t;
-        console.log( "s: " + GAME.state );
-    }
-};
+        return t;
+    };
 
-GAME.changeRules = function() {
-    var c = 0.0557,
-        p = c * ( GAME.count ),
-        r = Math.random();
+    GAME.choose = function( x ) {
+        GAME.you.next = x;
 
-    if ( r < p ) {
-        GAME.rules = !GAME.rules;
-        GAME.txt = "Hey, this is getting a bit unfair, how about we change the rules?";
         GAME.state = 1;
-    }
-
-    if ( GAME.you.points - GAME.me.points >= 18 ) {
-        GAME.txt = "This game is dumb, I'm not playing unless you give me all your points";
-    }
-    console.log( "p, r: " + p + " | " + r );
-};
-
-GAME.gText = function( x ) {
-    var t = "";
-    switch ( x ) {
-        case 1:
-            t = "According to the rules, you Lose when you " +
-                ( GAME.rules ? "Lose" : "Win" ) + ".";
-            break;
-        case 2:
-            t = "I'm impressed that a monkey like you managed to Win.";
-            break;
-        default:
-            t = "Since it's a Draw, it might as well be my Win, right?";
-    }
-    return t;
-};
-
-GAME.choose = function( x ) {
-    GAME.you.next = x;
-
-    GAME.state = 1;
-    var res = 0;
-    if ( GAME.rules ) {
-        res = GAME.me.next - GAME.you.next;
-    } else {
-        res = GAME.you.next - GAME.me.next;
-    }
-    res = ( res + 3 ) % 3;
-    GAME.txt = GAME.gText( res );
-    console.log( "mn, yn, r: " + GAME.me.next + " | " + x + " | " + res );
-
-    if ( res == 2 ) {
-        GAME.you.points += 1;
-        GAME.count += 1;
-    } else {
-        GAME.me.points += 1;
-        GAME.count = 0;
-    }
-    console.log( "p: " + GAME.me.points + " | " + GAME.you.points );
-
-    if ( GAME.me.points < GAME.you.points ) {
-        GAME.changeRules();
-    }
-};
-
-GAME.touch = {
-    x: 0,
-    y: 0,
-    id: 0,
-    press: false
-};
-
-CANVAS.init();
-
-GAME.upTouch = function( evt ) {
-    var rect = CANVAS.doc.getBoundingClientRect();
-    GAME.touch.x = evt.clientX - rect.left;
-    GAME.touch.x *= CANVAS.WIDTH / CANVAS.currentWidth;
-    GAME.touch.y = evt.clientY - rect.top;
-    GAME.touch.y *= CANVAS.HEIGHT / CANVAS.currentHeight;
-}
-
-if ( CANVAS.MOBILE ) {
-    window.addEventListener( "touchstart", function( event ) {
-        event.preventDefault();
-
-        var touch = event.touches[0];
-        GAME.upTouch( touch );
-        GAME.touch.id = touch.identifier;
-        GAME.touch.press = true;
-    }, false );
-
-    window.addEventListener( "touchmove", function( event ) {
-        event.preventDefault();
-        var touches = event.changedTouches,
-            rect = CANVAS.doc.getBoundingClientRect();
-
-        for ( var i = 0; i < touches.length; i += 1 ) {
-            if ( GAME.touch.id == touches[i].identifier ) {
-                GAME.upTouch( touches[i] );
-            }
+        var res = 0;
+        if ( GAME.rules ) {
+            res = GAME.me.next - GAME.you.next;
+        } else {
+            res = GAME.you.next - GAME.me.next;
         }
+        res = ( res + 3 ) % 3;
+        GAME.txt = GAME.gText( res );
+        console.log( "mn, yn, r: " + GAME.me.next + " | " + x + " | " + res );
 
-    }, false );
-
-    window.addEventListener( "touchend", function( event ) {
-        event.preventDefault();
-
-        var touches = event.changedTouches;
-        for ( var i = 0; i < touches.length; i += 1 ) {
-            if ( GAME.touch.id == touches[i].identifier ) {
-                GAME.touch.press = false;
-
-                GAME.click();
-            }
+        if ( res == 2 ) {
+            GAME.you.points += 1;
+            GAME.count += 1;
+        } else {
+            GAME.me.points += 1;
+            GAME.count = 0;
         }
-    }, false );
-} else {
-    window.addEventListener( "mousedown", function() {
-        GAME.touch.press = true;
-    } );
+        console.log( "p: " + GAME.me.points + " | " + GAME.you.points );
 
-    window.addEventListener( "mousemove", function( event ) {
-        GAME.upTouch( event );
-        GAME.hover();
-    }, false );
+        if ( GAME.me.points < GAME.you.points ) {
+            GAME.changeRules();
+        }
+    };
 
-    window.addEventListener( "mouseup", function( event ) {
-        GAME.upTouch( event );
-        GAME.touch.press = false;
-        GAME.click();
-    }, false )
-}
+    GAME.touch = {
+        x: 0,
+        y: 0,
+        id: 0,
+        press: false
+    };
+
+    CANVAS.init();
+
+    GAME.upTouch = function( evt ) {
+        var rect = CANVAS.doc.getBoundingClientRect();
+        GAME.touch.x = evt.clientX - rect.left;
+        GAME.touch.x *= CANVAS.WIDTH / CANVAS.currentWidth;
+        GAME.touch.y = evt.clientY - rect.top;
+        GAME.touch.y *= CANVAS.HEIGHT / CANVAS.currentHeight;
+    }
+
+    if ( CANVAS.MOBILE ) {
+        window.addEventListener( "touchstart", function( event ) {
+            event.preventDefault();
+
+            var touch = event.touches[0];
+            GAME.upTouch( touch );
+            GAME.touch.id = touch.identifier;
+            GAME.touch.press = true;
+        }, false );
+
+        window.addEventListener( "touchmove", function( event ) {
+            event.preventDefault();
+            var touches = event.changedTouches,
+                rect = CANVAS.doc.getBoundingClientRect();
+
+            for ( var i = 0; i < touches.length; i += 1 ) {
+                if ( GAME.touch.id == touches[i].identifier ) {
+                    GAME.upTouch( touches[i] );
+                }
+            }
+
+        }, false );
+
+        window.addEventListener( "touchend", function( event ) {
+            event.preventDefault();
+
+            var touches = event.changedTouches;
+            for ( var i = 0; i < touches.length; i += 1 ) {
+                if ( GAME.touch.id == touches[i].identifier ) {
+                    GAME.touch.press = false;
+
+                    GAME.click();
+                }
+            }
+        }, false );
+    } else {
+        window.addEventListener( "mousedown", function() {
+            GAME.touch.press = true;
+        } );
+
+        window.addEventListener( "mousemove", function( event ) {
+            GAME.upTouch( event );
+            GAME.hover();
+        }, false );
+
+        window.addEventListener( "mouseup", function( event ) {
+            GAME.upTouch( event );
+            GAME.touch.press = false;
+            GAME.click();
+        }, false )
+    }
