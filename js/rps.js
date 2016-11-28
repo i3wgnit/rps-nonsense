@@ -76,7 +76,7 @@ CANVAS.refresh = function() {
         CANVAS.Draw.rect( elem.x, elem.y, elem.w, elem.h ).fill( "rgba(" + elem.style + ", .5)" );
     } );
 
-    CANVAS.Draw.text( GAME.txt, 24, 472, 24, "black" );
+    CANVAS.Draw.text( GAME.text, 24, 472, 24, "black" );
 
     // Debug
     var txt1 = "MousePos: " + GAME.touch.x + ", " + GAME.touch.y,
@@ -91,12 +91,35 @@ var GAME = {
     play: 0,
     state: -1,
     rules: false,
-    txt: "",
+    text: "",
+    txt: {},
     count: 0,
     n: 0,
     p: 0,
     buttons: []
 };
+
+GAME.win = 19;
+
+GAME.txt.end = [
+    "Look at that! I won. Want to play again?"
+];
+
+GAME.txt.win = [
+    "I'm impressed that a monkey like you managed to Win."
+];
+
+GAME.txt.lose = [
+    "According to the rules, you Lose when you "
+];
+
+GAME.txt.draw = [
+    "Since it's a Draw, it might as well be my Win, right?"
+]
+
+GAME.txt.changeR = [
+    "Hey, this is getting a bit unfair, how about we change the rules?"
+];
 
 GAME.Player = function( n, p ) {
     this.points = p;
@@ -135,6 +158,10 @@ GAME.hover = function() {
     }
 }
 
+GAME.rText = function( arr ) {
+    return arr[ parseInt( arr.length * Math.random() ) ]
+}
+
 GAME.click = function() {
     if ( GAME.state == 0 ) {
         GAME.buttons.forEach( function( elem, ix ) {
@@ -144,17 +171,17 @@ GAME.click = function() {
             }
         } );
     } else if ( GAME.state == 1 ) {
-        GAME.txt = "";
+        GAME.text = "";
         GAME.state = 0;
-        if ( GAME.me.points - GAME.you.points >= 19 ) {
-            GAME.txt = "Look at that! I won. Want to play again?"
+        if ( GAME.me.points - GAME.you.points >= GAME.win ) {
+            GAME.text = GAME.rText( GAME.txt.end );
             GAME.state = -1;
         } else {
             GAME.me.next = parseInt( 3 * Math.random() );
         }
     } else if ( GAME.state == 2 ) {
         GAME.state = 1;
-        GAME.txt = "Way better, isn't it?";
+        GAME.text = "Way better, isn't it?";
         GAME.me.points += GAME.you.points;
         GAME.you.points = 0;
     } else if ( GAME.state < 0 ) {
@@ -170,7 +197,7 @@ GAME.click = function() {
                     t = "This is just like normal Rock Paper Scissors."
                     break;
                 case 3:
-                    t = "The goal is to get a 19 points advantage."
+                    t = "The goal is to get a " + GAME.win + " points advantage."
                     break;
                 case 4:
                     t = "Here is what I'm going to play, you do you.";
@@ -184,13 +211,13 @@ GAME.click = function() {
                     GAME.state = 0;
                     GAME.play = true;
             }
-            GAME.txt = t;
+            GAME.text = t;
             console.log( "s: " + GAME.state );
         } else {
             GAME.me.points = 0;
             GAME.you.points = 0;
             GAME.state = 0;
-            GAME.txt = "";
+            GAME.text = "";
         }
     }
 };
@@ -202,12 +229,12 @@ GAME.changeRules = function() {
 
     if ( r < p ) {
         GAME.rules = !GAME.rules;
-        GAME.txt = "Hey, this is getting a bit unfair, how about we change the rules?";
+        GAME.text = GAME.rText( GAME.txt.changeR );
         GAME.state = 1;
     }
 
-    if ( GAME.you.points - GAME.me.points >= 18 ) {
-        GAME.txt = "This game is dumb, let's swap points, ok?";
+    if ( GAME.you.points - GAME.me.points >= GAME.win - 1 ) {
+        GAME.text = "This game is dumb, maybe give me your points, ok?";
         GAME.state = 2;
     }
     console.log( "p, r: " + p + " | " + r );
@@ -217,14 +244,14 @@ GAME.gText = function( x ) {
     var t = "";
     switch ( x ) {
         case 1:
-            t = "According to the rules, you Lose when you " +
+            t = GAME.rText( GAME.txt.lose ) +
                 ( GAME.rules ? "Lose" : "Win" ) + ".";
             break;
         case 2:
-            t = "I'm impressed that a monkey like you managed to Win.";
+            t = GAME.rText( GAME.txt.win );
             break;
         default:
-            t = "Since it's a Draw, it might as well be my Win, right?";
+            t = GAME.rText( GAME.txt.draw );
     }
     return t;
 };
@@ -240,7 +267,7 @@ GAME.choose = function( x ) {
         res = GAME.you.next - GAME.me.next;
     }
     res = ( res + 3 ) % 3;
-    GAME.txt = GAME.gText( res );
+    GAME.text = GAME.gText( res );
     console.log( "mn, yn, r: " + GAME.me.next + " | " + x + " | " + res );
 
     if ( res == 2 ) {
