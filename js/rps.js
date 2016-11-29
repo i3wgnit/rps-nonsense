@@ -202,12 +202,12 @@ GAME.click = function() {
 					t = "The goal is to get a " + GAME.win + " points advantage."
 					break;
 				case 4:
-					t = "Here is what I'm going to play, you do you.";
-					GAME.n = true;
-					break;
-				case 5:
 					t = "Since it's your first time playing, I will give myself 3 points.";
 					GAME.p = true;
+					break;
+				case 5:
+					t = "Here is what I'm going to play, you do you.";
+					GAME.n = true;
 					break;
 				default:
 					GAME.state = 0;
