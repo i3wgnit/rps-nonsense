@@ -236,7 +236,7 @@ GAME.changeRules = function() {
 	}
 
 	if ( GAME.you.points - GAME.me.points >= GAME.win - 1 ) {
-		GAME.text = "This game is dumb, maybe give me your points, ok?";
+		GAME.text = "This game is dumb, just give me your points, ok?";
 		GAME.coubt = 0;
 		GAME.state = 2;
 	}
