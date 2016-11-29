@@ -178,7 +178,7 @@ GAME.click = function() {
 			GAME.text = GAME.rText( GAME.txt.end );
 			GAME.state = -1;
 		} else {
-			GAME.me.next += parseInt( 2 * Math.random() );
+			GAME.me.next += parseInt( 2 * Math.random() ) + 1;
 			GAME.me.next %= 3;
 		}
 	} else if ( GAME.state == 2 ) {
