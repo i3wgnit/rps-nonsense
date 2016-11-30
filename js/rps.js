@@ -63,8 +63,10 @@ CANVAS.refresh = function() {
 		CANVAS.ctx.drawImage( CANVAS.images[ GAME.me.next ], 384, 124, 248, 248 );
 		CANVAS.Draw.rect( 384, 124, 248, 248 ).fill( "rgba(" + colors[GAME.me.next] + ",0.5)" );
 		CANVAS.Draw.rect( 384, 124, 248, 248 ).stroke( "black", 8 );
-
-		GAME.buttons.forEach( function( elem, ix ) {
+	}
+	
+	if ( GAME.play ) {
+                GAME.buttons.forEach( function( elem, ix ) {
 			CANVAS.ctx.drawImage( CANVAS.images[ ix + "_" + elem.state ],
 								 elem.x, elem.y, elem.w, elem.h );
 			CANVAS.Draw.rect( elem.x, elem.y, elem.w, elem.h )
