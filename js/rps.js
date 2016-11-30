@@ -78,14 +78,6 @@ CANVAS.refresh = function() {
 	}
 
 	CANVAS.Draw.text( GAME.text, 24, 472, 24, "black" );
-
-	// Debug
-	var txt1 = "MousePos: " + GAME.touch.x + ", " + GAME.touch.y,
-		txt2 = "id: " + GAME.touch.id,
-		txt3 = "press: " + GAME.touch.press;
-	CANVAS.Draw.text( txt1, 1, 3, 16, "black" );
-	CANVAS.Draw.text( txt2, 1, 15, 16, "black" );
-	CANVAS.Draw.text( txt3, 1, 24, 16, "black" );
 };
 
 var GAME = {
@@ -172,7 +164,7 @@ GAME.click = function() {
 			}
 		} );
 	} else if ( GAME.state == 1 ) {
-		GAME.text = "";
+		GAME.text = "You only need " + ( 12 + GAME.me.points - GAME.you.points ) + " to go." ;
 		GAME.state = 0;
 		if ( GAME.me.points - GAME.you.points >= GAME.win ) {
 			GAME.text = GAME.rText( GAME.txt.end );
@@ -280,7 +272,6 @@ GAME.choose = function( x ) {
 		GAME.me.points += 1;
 		GAME.count = 0;
 	}
-	console.log( "p: " + GAME.me.points + " | " + GAME.you.points );
 
 	if ( GAME.me.points < GAME.you.points ) {
 		GAME.changeRules();
