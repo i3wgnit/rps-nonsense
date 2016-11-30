@@ -164,7 +164,7 @@ GAME.click = function() {
 			}
 		} );
 	} else if ( GAME.state == 1 ) {
-		GAME.text = "You only need " + ( 12 + GAME.me.points - GAME.you.points ) + " to go." ;
+		GAME.text = "You only need " + ( 12 + GAME.me.points - GAME.you.points ) + " to Win the Game." ;
 		GAME.state = 0;
 		if ( GAME.me.points - GAME.you.points >= GAME.win ) {
 			GAME.text = GAME.rText( GAME.txt.end );
@@ -228,7 +228,7 @@ GAME.changeRules = function() {
 	}
 
 	if ( GAME.you.points - GAME.me.points >= GAME.win - 1 ) {
-		GAME.text = "This game is dumb, just give me your points, ok?";
+		GAME.text = "This game is dumb, give me all your points, ok?";
 		GAME.coubt = 0;
 		GAME.state = 2;
 	}
